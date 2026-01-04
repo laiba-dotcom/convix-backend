@@ -6,3 +6,4 @@ python-dotenv
 pandas
 django-cors-headers
 djangorestframework-simplejwt
+dj-database-url
