@@ -62,7 +62,7 @@ MIDDLEWARE = [
 ]
 
 
-ROOT_URLCONF = 'urls'
+ROOT_URLCONF = 'backend.urls'  # correct — urls.py in backend folder
 
 TEMPLATES = [
     {
