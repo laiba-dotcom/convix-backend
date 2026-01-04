@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-8)9ad-n*8e0fhy^)h2q!*j!5$xlnjp+v$0@tz63f=f0ky3750y
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['convix-backend.onrender.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*']  # allow all (good for testing)
 
 
 # Application definition    
