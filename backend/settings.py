@@ -62,7 +62,7 @@ MIDDLEWARE = [
 ]
 
 
-ROOT_URLCONF = 'convix'
+ROOT_URLCONF = 'backend.urls'
 
 TEMPLATES = [
     {
