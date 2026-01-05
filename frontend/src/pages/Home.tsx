@@ -38,13 +38,13 @@ export default function Home() {
 
   // === YOUR REAL META CREDENTIALS ===
   const PHONE_NUMBER_ID = "882228088313519";  // ← Your Phone Number ID
-  const TOKEN = "EAAoIY65oyjsBQchwwnPtZCaiCNJ5fEl91qc19Ux19J7BJHxG0gMTATYVujv48cb8K1KAEnMfWORTrSbLUxh5thzxBUmHghmQWidGAmjSttSMDJGwUUlaY6zHmdZA6aa1Be4uL0B9XThxPzZAnLDBLSZBMvgYZCqBGfSFOIzpsZApwsaL992AvZBmHVpvrswRAZDZD";  // ← PASTE YOUR TOKEN HERE
+  const TOKEN = "EAAoIY65oyjsBQRIF4LHFZBg7pgCEFqI40DjKTVpDgFFNOf0D8UW1unYuDTZA2PTSImbIrJ0oJdNDh0VBpF48nRoOLqnmjlBQEXyWnerlGv0e1epartiMHvatJ5kZBh77H4upKF2suktv7LtGqi4VzVZBW9ZBHdFDvdfVwnZBGUeESQRg6thHctz0L2do6IL3E8XKeS3qBp1iQUjXhQJgcnNDd4Q5HfNzvo6qYSUrWkAEI4H0vskBEcd2ybMApedXZC1ZC3bGDMZCpMFHl7CvZCgBJn";
 
   // FETCH REAL WHATSAPP MESSAGES
  useEffect(() => {    
   const fetchFromBackend = async () => {
     try {
-      const res = await fetch('http://127.0.0.1:8000/whatsapp/messages/');
+      const res = await fetch('https://convix-backend.onrender.com/whatsapp/messages/');
       const data = await res.json();
 
       const newChats: Chat[] = [];

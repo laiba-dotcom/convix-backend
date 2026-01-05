@@ -80,12 +80,41 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-import os
-import dj_database_url
+# Database
+# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
-}
+import os
+try:
+    import dj_database_url
+    DATABASE_URL = os.environ.get('DATABASE_URL')
+    if DATABASE_URL:
+        DATABASES = {
+            'default': dj_database_url.parse(DATABASE_URL)
+        }
+    else:
+        # Local fallback if no DATABASE_URL
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': 'convix_db',  # your local DB name
+                'USER': 'postgres',
+                'PASSWORD': '2030',  # change to your PostgreSQL password
+                'HOST': 'localhost',
+                'PORT': '5432',
+            }
+        }
+except ImportError:
+    # If dj_database_url not installed locally
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'convix_db',
+            'USER': 'postgres',
+            'PASSWORD': 'your_local_password',
+            'HOST': 'localhost',
+            'PORT': '5432',
+        }
+    }
 
 
 # Password validation

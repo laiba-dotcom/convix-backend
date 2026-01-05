@@ -11,7 +11,7 @@ from datetime import datetime
 @csrf_exempt
 def webhook(request):
     if request.method == 'GET':
-        verify_token = "convix_secret_token_123"  # ← CHANGE IF YOU WANT
+        verify_token = "convix_secret_token_123"   
         mode = request.GET.get('hub.mode')
         token = request.GET.get('hub.verify_token')
         challenge = request.GET.get('hub.challenge')
