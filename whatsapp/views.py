@@ -1,6 +1,7 @@
 # whatsapp/views.py — FINAL CLEAN & WORKING VERSION
-from django.http import JsonResponse  # noqa: F401
-from django.views.decorators.csrf import csrf_exempt  # noqa: F401
+
+from django.http import HttpResponse, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from .models import WhatsAppMessage
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -10,22 +11,29 @@ from datetime import datetime
 # WEBHOOK — RECEIVE MESSAGES FROM META
 @csrf_exempt
 def webhook(request):
+    VERIFY_TOKEN = "convix_secret_token_123"  # MUST MATCH EXACTLY WHAT YOU PUT IN META DASHBOARD
+
     if request.method == 'GET':
-        verify_token = "convix_secret_token_123"   
+        # Meta verification (this is what was failing)
         mode = request.GET.get('hub.mode')
         token = request.GET.get('hub.verify_token')
         challenge = request.GET.get('hub.challenge')
 
-        if mode == 'subscribe' and token == verify_token:
-            return JsonResponse({'hub.challenge': challenge})
-        return JsonResponse({'error': 'Invalid token'}, status=403)
+        print(f"WEBHOOK GET - mode: {mode}, token: {token}, challenge: {challenge}")
+
+        if mode == 'subscribe' and token == VERIFY_TOKEN:
+            print("VERIFICATION SUCCESS - returning challenge:", challenge)
+            return HttpResponse(challenge)  # THIS LINE IS CRITICAL — Meta expects raw challenge back
+
+        print("VERIFICATION FAILED - wrong token or mode")
+        return HttpResponse(status=403)
 
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            print("NEW MESSAGE FROM WHATSAPP:", data)
+            print("NEW MESSAGE FROM WHATSAPP:", json.dumps(data, indent=2))
 
-            # Save every message
+            # Save every message (your original code — kept unchanged)
             for entry in data.get('entry', []):
                 for change in entry.get('changes', []): 
                     value = change.get('value', {})
@@ -46,7 +54,7 @@ def webhook(request):
     return JsonResponse({'error': 'method not allowed'}, status=405)
 
 
-# API — GET MESSAGES FOR FRONTEND
+# API — GET MESSAGES FOR FRONTEND (unchanged — working)
 @api_view(['GET'])
 def get_messages(request):
     # Get last 50 messages
