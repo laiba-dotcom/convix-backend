@@ -9,8 +9,14 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-import os
+
 from pathlib import Path
+from dotenv import load_dotenv
+import dj_database_url
+import os
+
+# Load .env file (for local development)
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,10 +31,10 @@ SECRET_KEY = 'django-insecure-8)9ad-n*8e0fhy^)h2q!*j!5$xlnjp+v$0@tz63f=f0ky3750y
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']  # allow all (good for testing)
+ALLOWED_HOSTS = ['convix-backend.onrender.com', '*']
 
 
-# Application definition    
+# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -42,11 +48,11 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'broadcast',
     'whatsapp',
+    'chatbot',
 ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -56,8 +62,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-
-ROOT_URLCONF = 'backend.urls'  # correct — urls.py in backend folder
+ROOT_URLCONF = 'backend.urls'
 
 TEMPLATES = [
     {
@@ -66,6 +71,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -77,49 +83,17 @@ TEMPLATES = [
 WSGI_APPLICATION = 'backend.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-import os
-try:
-    import dj_database_url
-    DATABASE_URL = os.environ.get('DATABASE_URL')
-    if DATABASE_URL:
-        DATABASES = {
-            'default': dj_database_url.parse(DATABASE_URL)
-        }
-    else:
-        # Local fallback if no DATABASE_URL
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': 'convix_db',  # your local DB name
-                'USER': 'postgres',
-                'PASSWORD': '2030',  # change to your PostgreSQL password
-                'HOST': 'localhost',
-                'PORT': '5432',
-            }
-        }
-except ImportError:
-    # If dj_database_url not installed locally
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'convix_db',
-            'USER': 'postgres',
-            'PASSWORD': 'your_local_password',
-            'HOST': 'localhost',
-            'PORT': '5432',
-        }
-    }
+# Database - Uses DATABASE_URL from .env (local) or Render environment (production)
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.getenv('DATABASE_URL'),
+        conn_max_age=600,
+        ssl_require=True
+    )
+}
 
 
 # Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -137,8 +111,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -149,32 +121,22 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
 STATIC_URL = 'static/'
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Allow React frontend
+# CORS - Allow React frontend
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-] 
- 
+    "http://127.0.0.1:3000",
+]
+
+# Temporary - Allow all for testing (REMOVE LATER for production!)
+CORS_ALLOW_ALL_ORIGINS = True
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 }
-
-# ALLOW REACT
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
-
-# OR ALLOW ALL (TEMP FOR TESTING)
-CORS_ALLOW_ALL_ORIGINS = True  # ← REMOVE LATER
