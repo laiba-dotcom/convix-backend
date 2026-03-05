@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 import dj_database_url
 import os
 
-# Load .env file (for local development)
+# Load .env file for local development
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -31,7 +31,7 @@ SECRET_KEY = 'django-insecure-8)9ad-n*8e0fhy^)h2q!*j!5$xlnjp+v$0@tz63f=f0ky3750y
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['convix-backend.onrender.com', '*']
+ALLOWED_HOSTS = ['convix-backend.onrender.com', 'localhost', '127.0.0.1', '*']
 
 
 # Application definition
@@ -84,9 +84,16 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 
 # Database - Uses DATABASE_URL from .env (local) or Render environment (production)
+DATABASE_URL = os.getenv('DATABASE_URL')
+
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL is missing! Check .env file or Render environment variables.")
+
+print("Loading database from:", DATABASE_URL)  # Debug line - will show in Render logs
+
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL'),
+        default=DATABASE_URL,
         conn_max_age=600,
         ssl_require=True
     )
@@ -132,7 +139,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
 ]
 
-# Temporary - Allow all for testing (REMOVE LATER for production!)
+# Temporary - Allow all for testing (REMOVE LATER in production!)
 CORS_ALLOW_ALL_ORIGINS = True
 
 REST_FRAMEWORK = {
