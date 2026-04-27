@@ -3,30 +3,31 @@
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import WhatsAppMessage
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view  
 from rest_framework.response import Response
 import json
 from datetime import datetime
+from django.http import HttpResponse, JsonResponse, HttpRequest
+from django.utils import timezone
 
-# WEBHOOK — RECEIVE MESSAGES FROM META
-@csrf_exempt
-def webhook(request):
-    VERIFY_TOKEN = "convix_secret_token_123"  # MUST MATCH EXACTLY WHAT YOU PUT IN META DASHBOARD
 
-    if request.method == 'GET':
-        # Meta verification (this is what was failing)
-        mode = request.GET.get('hub.mode')
-        token = request.GET.get('hub.verify_token')
-        challenge = request.GET.get('hub.challenge')
+def webhook(request: HttpRequest):
+    VERIFY_TOKEN = "convix_secret_token_123"
 
-        print(f"WEBHOOK GET - mode: {mode}, token: {token}, challenge: {challenge}")
+    if request.method == "GET":
+        mode = request.GET.get("hub.mode")
+        token = request.GET.get("hub.verify_token")
+        challenge = request.GET.get("hub.challenge")
 
-        if mode == 'subscribe' and token == VERIFY_TOKEN:
-            print("VERIFICATION SUCCESS - returning challenge:", challenge)
-            return HttpResponse(challenge)  # THIS LINE IS CRITICAL — Meta expects raw challenge back
+        print(f"WEBHOOK GET - mode={mode}, token={token}, challenge={challenge}")
 
-        print("VERIFICATION FAILED - wrong token or mode")
+        if mode == "subscribe" and token == VERIFY_TOKEN:
+            return HttpResponse(challenge, content_type="text/plain")
+
         return HttpResponse(status=403)
+
+
+        
 
     if request.method == 'POST':
         try:
@@ -43,7 +44,7 @@ def webhook(request):
                                 message_id=msg['id'],
                                 from_phone=msg['from'],
                                 body=msg.get('text', {}).get('body', '(Media)'),
-                                timestamp=datetime.fromtimestamp(int(msg['timestamp']))
+                                timestamp=datetime.fromtimestamp(int(msg['timestamp']), tz=timezone.utc)
                             )
 
             return JsonResponse({'status': 'ok'})
@@ -70,3 +71,49 @@ def get_messages(request):
         })
 
     return Response(data)
+
+
+import requests
+from django.conf import settings
+
+@api_view(['POST'])
+def send_message(request):
+    to_phone = request.data.get('to')
+    text = request.data.get('text')
+
+    PHONE_NUMBER_ID = "979251638611436"
+    ACCESS_TOKEN = "YOUR_TOKEN"
+
+    url = f"https://graph.facebook.com/v19.0/{PHONE_NUMBER_ID}/messages"
+
+    payload = {
+        "messaging_product": "whatsapp",
+        "recipient_type": "individual",
+        "to": to_phone.replace('+', ''),
+        "type": "text",
+        "text": {
+            "body": text
+        }
+    }
+
+    headers = {
+        "Authorization": f"Bearer {ACCESS_TOKEN}",
+        "Content-Type": "application/json"
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+    result = response.json()
+
+    if response.status_code != 200:
+        return Response({"error": result}, status=400)
+
+    # SAVE MESSAGE IN DB
+    WhatsAppMessage.objects.create(
+        message_id=result['messages'][0]['id'],
+        from_phone=to_phone,
+        body=text,
+        timestamp=timezone.now(),
+        direction='outgoing'
+    )
+
+    return Response({"status": "sent"})
