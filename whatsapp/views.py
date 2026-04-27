@@ -9,7 +9,9 @@ import json
 from datetime import datetime
 from django.http import HttpResponse, JsonResponse, HttpRequest
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 
+@csrf_exempt
 
 def webhook(request: HttpRequest):
     VERIFY_TOKEN = "convix_secret_token_123"
