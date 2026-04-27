@@ -11,6 +11,7 @@ from django.http import HttpResponse, JsonResponse, HttpRequest
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
+
 @csrf_exempt
 
 def webhook(request: HttpRequest):
@@ -46,7 +47,9 @@ def webhook(request: HttpRequest):
                                 message_id=msg['id'],
                                 from_phone=msg['from'],
                                 body=msg.get('text', {}).get('body', '(Media)'),
-                                timestamp=datetime.fromtimestamp(int(msg['timestamp']), tz=timezone.utc)
+                             timestamp = timezone.make_aware(
+    datetime.fromtimestamp(int(msg['timestamp']))
+                             )
                             )
 
             return JsonResponse({'status': 'ok'})
